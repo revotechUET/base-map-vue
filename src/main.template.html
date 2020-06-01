@@ -1,5 +1,16 @@
 <!-- APP LAYOUT  -->
 <fragment>
-    <example></example>
-    <div>{{test1}}</div>
+    <div class="top-bar">
+        <!-- <base-map-ribbon-bar></base-map-ribbon-bar> -->
+    </div>
+    <div v-resizable-container.horizontal>
+        <div style="height: 90vh" v-resizable-item>
+            <!-- <base-map-input-tree></base-map-input-tree> -->
+            <div>this is sample text 1</div>
+        </div>
+        <div style="height: 90vh" v-resizable-item>
+            <div>this is sample text</div>
+            <!-- <base-map-map-view></base-map-map-view> -->
+        </div>
+    </div>
 </fragment>

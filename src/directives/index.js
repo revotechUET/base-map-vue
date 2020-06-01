@@ -1,2 +1,2 @@
-import demo from "./demo"
-export default {demo};
+import resizableContainer from './resizable-container';
+export default { resizableContainer };
