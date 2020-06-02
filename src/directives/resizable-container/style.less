@@ -6,6 +6,7 @@
         flex: 0 0 auto;
         position: relative;
 
+
         .resize-handle {
             background-color: darkgrey;
             position: absolute;
@@ -15,6 +16,7 @@
         .resize-handle-vertical {
             width: 100%;
             height: 10px;
+            bottom: 0px;
             margin-top: -5px;
             cursor: row-resize;
         }
@@ -28,6 +30,13 @@
         }
 
         .resize-handle-disable {
+            display: none;
+        }
+    }
+
+    .resize-item:last-of-type {
+        flex-grow: 1;
+        .resize-handle {
             display: none;
         }
     }

@@ -11,21 +11,35 @@ Vue.directive('resizable-item', {
         if (binding.modifiers.disable) {
             handle.classList.add("resize-handle-disable")
         }
+        console.log(binding)
 
-        const style = window.getComputedStyle(el);
+        setTimeout(() => {
+            const isVertical = el.parentElement.classList.contains('resize-vertical');
 
-        handle.draggable = true;
-        handle.ondragstart = function(event) {
-            console.log("drag start");
-        }
-        handle.ondrag = function(event) {
-            console.log("dragging");
-        }
-        handle.ondragend = function(event) {
-            console.log("drag end", event.offsetX);
-            const width = parseInt(style.getPropertyValue('width'));
-            el.style.width = `${width + event.offsetX}px`;
-        }
+            // init default size
+            if (binding.value && isFinite(binding.value.defaultSize)) {
+                el.style[isVertical ? "height":"width"] = `${binding.value.defaultSize}px`
+            }
+
+            const style = window.getComputedStyle(el);
+            handle.draggable = true;
+            handle.ondragstart = function (event) {
+                console.log("drag start");
+            }
+            handle.ondrag = function (event) {
+                console.log("dragging");
+            }
+            handle.ondragend = function (event) {
+                console.log("drag end", event.offsetX);
+                if (isVertical) {
+                    const height = parseInt(style.getPropertyValue('height'));
+                    el.style.height = `${height + event.offsetY}px`;
+                } else {
+                    const width = parseInt(style.getPropertyValue('width'));
+                    el.style.width = `${width + event.offsetX}px`;
+                }
+            }
+        })
     }
 })
 
