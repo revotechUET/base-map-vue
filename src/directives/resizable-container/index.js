@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import "./style.less";
 
-Vue.directive('resizable-item', {
+const resizableItem = Vue.directive('resizable-item', {
     bind: function(el, binding, vnode) {
         el.classList.add('resize-item');
 
@@ -11,7 +11,7 @@ Vue.directive('resizable-item', {
         if (binding.modifiers.disable) {
             handle.classList.add("resize-handle-disable")
         }
-        console.log(binding)
+        // console.log(binding)
 
         setTimeout(() => {
             const isVertical = el.parentElement.classList.contains('resize-vertical');
@@ -24,13 +24,13 @@ Vue.directive('resizable-item', {
             const style = window.getComputedStyle(el);
             handle.draggable = true;
             handle.ondragstart = function (event) {
-                console.log("drag start");
+                // console.log("drag start");
             }
             handle.ondrag = function (event) {
-                console.log("dragging");
+                // console.log("dragging");
             }
             handle.ondragend = function (event) {
-                console.log("drag end", event.offsetX);
+                // console.log("drag end", event.offsetX);
                 if (isVertical) {
                     const height = parseInt(style.getPropertyValue('height'));
                     el.style.height = `${height + event.offsetY}px`;
@@ -42,8 +42,7 @@ Vue.directive('resizable-item', {
         })
     }
 })
-
-export default Vue.directive('resizable-container', {
+const resizableContainer = Vue.directive('resizable-container', {
     bind: function(el, binding, vnode) {
         el.classList.add("resize-container");
         if (binding.modifiers.horizontal) {
@@ -60,3 +59,8 @@ export default Vue.directive('resizable-container', {
         }
     }
 })
+
+export default {
+    resizableContainer,
+    resizableItem
+}

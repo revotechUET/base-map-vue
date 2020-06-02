@@ -14,19 +14,7 @@ new Vue({
     template, components,
     provide: () => services,
     computed: { },
-    data: {
-        treeExample: [
-            {
-                name: "test",
-            },
-            {
-                name: "test1",
-                children: [{
-                    name: 'abc'
-                }]
-            }
-        ]
-    },
+    data: { },
     methods: {
         getLabel: (node) => node.name,
         getIcon: () => '',
