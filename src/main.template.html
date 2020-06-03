@@ -1,8 +1,6 @@
 <!-- APP LAYOUT  -->
 <fragment>
-    <div class="top-bar">
-        <base-map-nav-bar></base-map-nav-bar>
-    </div>
+    <base-map-nav-bar :menu="mainMenu"></base-map-nav-bar>
     <div class="main-content" v-resizable-container.horizontal>
         <div v-resizable-item="{defaultSize: 400}">
             <base-map-input-tree></base-map-input-tree>

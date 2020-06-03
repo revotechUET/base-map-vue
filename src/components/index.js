@@ -1,6 +1,6 @@
 import Vue from "vue";
 
-// COMPONENTS donot registered
+// IMPORTED COMPONENTS 
 import { WiTree } from "@revotechuet/misc-component-vue"
 Vue.component('wi-tree', WiTree);
 

@@ -1,10 +1,11 @@
 import template from "./template.html";
 import "./style.less";
+import * as apiService from "../../services/apiService";
 
 const component =  {
     props: [ ],
     template,
-    inject: ['apiService'],
+    inject: [],
     data: function() {
         return {
             tree: [ ]
@@ -17,8 +18,6 @@ const component =  {
     },
     mounted() {
         this.$nextTick(async() => {
-            const proj = await this.apiService.getProject();
-            console.log(proj);
         })
     }
 }
