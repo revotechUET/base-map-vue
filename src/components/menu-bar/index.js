@@ -10,13 +10,25 @@ const component =  {
     },
     watch: {},
     methods: {
-        execMenuItem: function(menuItem) {
-            if (menuItem.children && menuItem.children.length) {
-                menuItem.show = !menuItem.show;
+        execMenuItem: function(menuItem, mouseover) {
+            if (mouseover) {
+                if (menuItem.children && menuItem.children.length) {
+                    menuItem.show = true;
+                    if (menuItem.show) {
+                        this.menu.forEach(item => {
+                            if (item !== menuItem)
+                                item.show = false;
+                        })
+                    }
+                }
             }
             else {
                 menuItem.handler && menuItem.handler();
             }
+        },
+        unShowAllMenuItem: function() {
+            console.log("unShow");
+            this.menu.forEach(item => item.show = false);
         },
         openModal: function() {
             this.infoDialog({
@@ -44,10 +56,10 @@ const component =  {
     },
     mounted() {
         this.$nextTick(() => {
-            // this.menu = this.menu || ["abc", "def"];
         });
     }
 };
 
 const VueComponent = Vue.extend(component);
-export default dialogFactoryFn(VueComponent);
+const MenuBar = dialogFactoryFn(VueComponent);
+export { MenuBar as default };

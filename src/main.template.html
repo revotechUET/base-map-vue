@@ -1,9 +1,9 @@
 <!-- APP LAYOUT  -->
 <fragment>
-    <base-map-nav-bar :menu="mainMenu"></base-map-nav-bar>
+    <menu-bar :menu="mainMenu"></menu-bar>
     <div class="main-content" v-resizable-container.horizontal>
         <div v-resizable-item="{defaultSize: 400}">
-            <base-map-input-tree></base-map-input-tree>
+            <base-map-input-tree :tree-config="treeConfig"></base-map-input-tree>
         </div>
         <div v-resizable-item>
             <base-map-map-view></base-map-map-view>

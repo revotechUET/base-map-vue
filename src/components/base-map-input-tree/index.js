@@ -1,15 +1,17 @@
 import template from "./template.html";
 import "./style.less";
-import * as apiService from "../../services/apiService";
+import Vue from "vue";
+// import * as apiService from "../../services/apiService";
+
+// IMPORTED COMPONENTS 
+import { WiTree } from "@revotechuet/misc-component-vue"
+Vue.component('wi-tree', WiTree);
 
 const component =  {
-    props: [ ],
+    props: [ 'treeConfig' ],
     template,
-    inject: [],
     data: function() {
-        return {
-            tree: [ ]
-        };
+        return { };
     },
     watch: {},
     methods: {
@@ -22,4 +24,5 @@ const component =  {
     }
 }
 
-export default component;
+const VueComponent = Vue.extend(component);
+export default VueComponent;

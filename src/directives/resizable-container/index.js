@@ -26,18 +26,36 @@ const resizableItem = Vue.directive('resizable-item', {
             handle.ondragstart = function (event) {
                 // console.log("drag start");
             }
-            handle.ondrag = function (event) {
+            handle.ondrag = (event) => {
                 // console.log("dragging");
+                if (Math.random() < 0.2) {
+                    requestAnimationFrame(() => {
+                        console.log("Hmm", event.offsetX, event.offsetY);
+                        if (!event || !event.offsetX || !event.offsetY) {
+                            return;
+                        }
+                        if (isVertical) {
+                            const height = parseInt(style.getPropertyValue('height'));
+                            el.style.height = `${height + event.offsetY}px`;
+                        } else {
+                            const width = parseInt(style.getPropertyValue('width'));
+                            el.style.width = `${width + event.offsetX}px`;
+                        }
+
+                    });
+                }
             }
             handle.ondragend = function (event) {
                 // console.log("drag end", event.offsetX);
-                if (isVertical) {
-                    const height = parseInt(style.getPropertyValue('height'));
-                    el.style.height = `${height + event.offsetY}px`;
-                } else {
-                    const width = parseInt(style.getPropertyValue('width'));
-                    el.style.width = `${width + event.offsetX}px`;
-                }
+                requestAnimationFrame(() => {
+                    if (isVertical) {
+                        const height = parseInt(style.getPropertyValue('height'));
+                        el.style.height = `${height + event.offsetY}px`;
+                    } else {
+                        const width = parseInt(style.getPropertyValue('width'));
+                        el.style.width = `${width + event.offsetX}px`;
+                    }
+                });
             }
         })
     }

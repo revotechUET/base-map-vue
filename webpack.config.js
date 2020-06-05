@@ -11,7 +11,8 @@ const plugins =  [
 
 module.exports = {
     context: __dirname + '/src',
-    mode: isDev ? "development":"production",
+    // TODO: only development works well, review later
+    mode: (isDev || true) ? "development":"production",
     devtool: (isDev || true) ? "cheap-module-eval-source-map":false,
     optimization: {
         minimize: isDev ? false:true
