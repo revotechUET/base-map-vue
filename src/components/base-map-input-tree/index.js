@@ -1,9 +1,8 @@
 import template from "./template.html";
 import "./style.less";
 import Vue from "vue";
-// import * as apiService from "../../services/apiService";
 
-// IMPORTED COMPONENTS 
+// DEPENDENT COMPONENTS 
 import { WiTree } from "@revotechuet/misc-component-vue"
 Vue.component('wi-tree', WiTree);
 

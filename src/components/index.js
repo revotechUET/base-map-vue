@@ -1,9 +1,9 @@
 import BaseMapInputTree from "./base-map-input-tree";
 import BaseMapMapView from "./base-map-map-view";
-import MenuBar from "./menu-bar";
+import {VueMenuBar} from '../../../misc-component-vue';
 
 export default {
     BaseMapInputTree,
     BaseMapMapView,
-    MenuBar
+    VueMenuBar
 };

@@ -4,19 +4,13 @@ export default [{
     show: false, 
     children: [{
         label: "New",
-        handler: function() {
-            printFn(this);
-        }
+        handler: newProjectButtonClicked
     },{
         label: "Open",
-        handler: function() {
-            printFn(this);
-        }
+        handler: openProjectButtonClicked
     },{
         label: "Save",
-        handler: function() {
-            printFn(this);
-        }
+        handler: saveProjectButtonClicked
     }]
 },{
     label: "Import",
@@ -24,19 +18,19 @@ export default [{
     children: [{
         label: "Wells",
         handler: function() {
-            printFn(this);
+            console.log(this);
             projectTree.addWell({name: "DEMO WELL" + Math.round(Math.random() * 100)});
         }
     },{
         label: "ZMap",
         handler: function() {
-            printFn(this);
+            console.log(this);
             projectTree.addZMap({name: "DEMO ZMAP" + Math.round(Math.random() * 100)});
         }
     },{
         label: "Boundary",
         handler: function() {
-            printFn(this);
+            console.log(this);
             projectTree.addBoundary({name: "DEMO Boundary" + Math.round(Math.random() * 100)});
         }
     }]
@@ -46,21 +40,39 @@ export default [{
     children: [{
         label: "Wells",
         handler: function() {
-            printFn(this);
+            console.log(this);
         }
     },{
         label: "ZMap",
         handler: function() {
-            printFn(this);
+            console.log(this);
         }
     },{
         label: "Boundary",
         handler: function() {
-            printFn(this);
+            console.log(this);
         }
     }]
 }]
 
-function printFn(obj) {
-    console.log(obj.label);
+function newProjectButtonClicked() {
+    console.log(this);
+}
+
+function openProjectButtonClicked() {
+    console.log(this);
+    this.promptDialog({
+        title: "Edit props",
+        inputs: [
+            {type: 'text', label: "Props 1", getValue: () => 1}
+        ],
+        buttons: [
+            {label:"Cancel", handler: (close) => close()},
+            {label:"OK", handler: (close) => close()},
+        ]
+    })
+}
+
+function saveProjectButtonClicked() {
+    console.log(this);
 }
