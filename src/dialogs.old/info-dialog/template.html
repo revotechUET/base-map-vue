@@ -1,9 +1,0 @@
-<div class="vue-info-modal">
-    <h1 class="modal-title">{{title}}</h1>
-    <p class="modal-content">{{content}}</p>
-    <div class="modal-btn-group">
-        <button class="modal-btn" v-for="(btn, idx) in buttons" :key="idx" @click="buttonClicked(btn.handler)">
-            {{btn.label}}
-        </button>
-    </div>
-</div>
