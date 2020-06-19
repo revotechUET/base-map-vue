@@ -1,0 +1,18 @@
+<div style="width: calc(100% - 1em); height: calc(100% - 1em); padding: .5em;" @contextmenu="openContextMenu($event)">
+    <div>
+        map view
+        <button @click="openModal($event)">Click me!</button>
+    </div>
+    <div style="border: 1px solid black;display:inline-block;">
+        <wi-select :options="opts" :get-selected="getSelected" :get-label-fn="getLabelFn" :on-select="onSelectItemChanged" :item-buttons="optButtons"></wi-select>
+    </div>
+
+    <fragment>
+        <v-scene :view-width="800" :view-height="600" :transparent="true">
+            <v-rect :view-width="30" :view-height="100" :line-width="1" 
+                :enabled="true" :draggable="true"
+                :constrained="true"
+                fill-color="#ccffcc" />
+        </v-scene>
+    </fragment>
+</div>

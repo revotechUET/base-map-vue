@@ -1,21 +1,15 @@
 const HardSourceWebpackPlugin = require("hard-source-webpack-plugin");
-const HtmlWebpackPlugin = require("html-webpack-plugin");
-
-const isDev = process.env.NODE_ENV.trim() === "dev" ? true:false;
-console.log(`building in dev mode: ${isDev}`);
 
 const plugins =  [
     new HardSourceWebpackPlugin(),
-    new HtmlWebpackPlugin({ template: `./index.html` })
 ];
 
 module.exports = {
     context: __dirname + '/src',
-    // TODO: only development works well, review later
-    mode: (isDev || true) ? "development":"production",
-    devtool: (isDev || true) ? "cheap-module-eval-source-map":false,
+    mode: "development",
+    devtool: "cheap-module-eval-source-map",
     optimization: {
-        minimize: isDev ? false:true
+        minimize: false
     },
     devServer: {
         contentBase: __dirname + '/dist',
@@ -26,7 +20,7 @@ module.exports = {
         port: 3000
     },
     entry: {
-        main: `./index.js`
+        main: `./index1.js`
     },
     output: {
         path: __dirname + "/dist",
@@ -36,7 +30,12 @@ module.exports = {
         rules: [
             {
                 test: /\.html$/,
-                use: [ 'html-loader' ]
+                use: [{
+                    loader: 'html-loader',
+                    options: {
+                        interpolate: true
+                    }
+                }]
             }, {
                 test: /\.css$/,
                 use: [ 'style-loader', 'css-loader' ],
@@ -48,13 +47,19 @@ module.exports = {
             {
                 test: /\.(png|jpg|gif)$/i,
                 use: [ 'url-loader' ],
+            },
+            {
+                test: /.(ttf|otf|eot|svg|woff(2)?)(\?[a-z0-9]+)?$/,
+                use: [ 'file-loader' ]
             }
         ],
     },
     resolve: {
         alias: {
-            'vue$': 'vue/dist/vue.esm.js' // sử dụng 'vue/dist/vue.common.js' nếu là webpack 1
-        }
+            'vue$': __dirname + '/node_modules/vue/dist/vue.esm.js',
+            // 'vue$': 'vue/dist/vue.esm.js',
+        },
+        extensions: ['*', '.js', '.vue', '.json']
     },
     plugins
 }

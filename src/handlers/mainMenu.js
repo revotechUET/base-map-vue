@@ -19,19 +19,19 @@ export default [{
         label: "Wells",
         handler: function() {
             console.log(this);
-            projectTree.addWell({name: "DEMO WELL" + Math.round(Math.random() * 100)});
+            projectTree.addWells([{name: "DEMO WELL" + Math.round(Math.random() * 100)}]);
         }
     },{
         label: "ZMap",
         handler: function() {
             console.log(this);
-            projectTree.addZMap({name: "DEMO ZMAP" + Math.round(Math.random() * 100)});
+            projectTree.addZMaps([{name: "DEMO ZMAP" + Math.round(Math.random() * 100)}]);
         }
     },{
         label: "Boundary",
         handler: function() {
             console.log(this);
-            projectTree.addBoundary({name: "DEMO Boundary" + Math.round(Math.random() * 100)});
+            projectTree.addBoundarys([{name: "DEMO Boundary" + Math.round(Math.random() * 100)}]);
         }
     }]
 },{
@@ -56,15 +56,42 @@ export default [{
 }]
 
 function newProjectButtonClicked() {
-    console.log(this);
+    const properties = {
+        name: "New Project"
+    };
+    this.promptDialog({
+        title: "New Project",
+        inputs: [
+            {
+                type: 'text',
+                label: "Project Name",
+                params: properties,
+                getValue: (params) => params.name,
+                setValue: (params, temp) => {
+                    params.name = temp
+                }
+            }
+        ],
+        buttons: [
+            {label:"Cancel", handler: (close) => close()},
+            {label:"OK", handler: (close) => {
+                projectTree.changeProject({
+                    name: properties.name,
+                })
+                close();
+            }},
+        ]
+    }).then(msg => {
+        console.log(msg);
+    })
 }
 
 function openProjectButtonClicked() {
     console.log(this);
     this.promptDialog({
-        title: "Edit props",
+        title: "Select Project",
         inputs: [
-            {type: 'text', label: "Props 1", getValue: () => 1}
+            {type: 'select', label: "Project"}
         ],
         buttons: [
             {label:"Cancel", handler: (close) => close()},
@@ -75,4 +102,14 @@ function openProjectButtonClicked() {
 
 function saveProjectButtonClicked() {
     console.log(this);
+    this.promptDialog({
+        title: "Save Project",
+        inputs: [
+            {type: 'text', label: "Project Name", getValue: () => 'text'}
+        ],
+        buttons: [
+            {label:"Cancel", handler: (close) => close()},
+            {label:"OK", handler: (close) => close()},
+        ]
+    })
 }
