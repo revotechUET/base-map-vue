@@ -1,7 +1,9 @@
 const HardSourceWebpackPlugin = require("hard-source-webpack-plugin");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 const plugins =  [
     new HardSourceWebpackPlugin(),
+    new HtmlWebpackPlugin({ template: `./index.html` }),
 ];
 
 module.exports = {
@@ -20,7 +22,7 @@ module.exports = {
         port: 3000
     },
     entry: {
-        main: `./index1.js`
+        main: `./index.js`
     },
     output: {
         path: __dirname + "/dist",
@@ -58,8 +60,7 @@ module.exports = {
         alias: {
             'vue$': __dirname + '/node_modules/vue/dist/vue.esm.js',
             // 'vue$': 'vue/dist/vue.esm.js',
-        },
-        extensions: ['*', '.js', '.vue', '.json']
+        }
     },
     plugins
 }

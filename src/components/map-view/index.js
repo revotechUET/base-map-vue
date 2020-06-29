@@ -1,40 +1,36 @@
 import template from "./template.html";
 import "./style.less";
 import {WiSelect} from "../../../../misc-component-vue";
+import {VContour, VScene, VCartersian, VViewport, VPolygon} from "plot-toolkit-2";
+// import {ContourFileImport} from "../../../../contour-module/src/components/index-vue";
+// import {ContourFileImport} from "@revotechuet/contour-module";
+import * as _ from "lodash";
 // import {VScene, VRect} from "plot-toolkit-2";
 
-const components = {WiSelect} //, VScene, VRect};
+// const components = {WiSelect, VContour, VScene, VCartersian, VViewport, ContourFileImport}
+const components = {WiSelect, VContour, VScene, VCartersian, VViewport}
 const component =  {
-    props: [ ],
+    props: [ "drawWidth", "drawHeight" ],
     template,
     components, 
-    data: function() {
+    data() {
         return {
-            opts: [
-                {label: "name 1"},
-                {label: "name sakdjfkdsajflkjdsaflkja dsjflkajsdlkfjdsa 2"},
-                {label: "name 3"},
-            ],
-            optButtons: [
-                {
-                    class: "fa fa-edit",
-                    handler: (item) => {
-                        console.log("edit item", item);
-                    }
-                }
-            ]
+            contourValues: [],
+            contourHeaders: {},
+            vpWidth: 500,
+            vpHeight: 500,
+            yDirection: "up",
+            path: [{x: 10, y: 20}, {x: 50, y: 70}, {x: 30, y: 20}]
         };
     },
     watch: {},
+    computed: {
+        minX() { return this.contourHeaders.minX},
+        maxX() { return this.contourHeaders.maxX},
+        minY() { return this.yDirection === "up" ? this.contourHeaders.maxY:this.contourHeaders.minY},
+        maxY() { return this.yDirection === "up" ? this.contourHeaders.minY:this.contourHeaders.maxY},
+    },
     methods: {
-        getSelected: (opts) => {
-            return opts[0];
-        },
-        onSelectItemChanged: function(item) {
-            console.log(item);
-        },
-        getLabelFn: (node) => node.label || node.name,
-        getIcon: () => "",
         openContextMenu: function(event) {
             // console.log("DEBUG[outside] ", this);
             this.showContextMenu(event, [
@@ -43,33 +39,44 @@ const component =  {
                 {label: "TEST 3", handler: function() {console.log(this.label)}},
             ]);
         },
-        openModal: function() {
-            const dialogs = [ "infoDialog", "successDialog", "warningDialog", "errorDialog" ];
-            const rand = Math.floor(Math.random() * 4)
-            this[dialogs[rand]]({
-                title: "Alert",
-                content: "This is content of the modal",
-                buttons: [
-                    {
-                        label: "Cancel", handler: (close) => {
-                            console.log("Cancel button clicked")
-                            close && close();
-                        }
-                    },
-                    {
-                        label: "OK", handler: (close) => {
-                            console.log("OK button clicked")
-                            close && close();
-                        }
-                    }
-                ]
-            })
-                .then(msg => {
-                    console.log("before dialog: ", msg);
-                });
+        onDataChanged(changedData) {
+            this.contourHeaders = _.clone(changedData.headers);
+            this.contourValues = _.flatten(changedData.data);
+        },
+        zoomFn: function (delta, centerX, centerY, evt) {
+            const zoomFactor = 1.1;
+            let { x, y } = this.$refs.viewport.pixiObj.children[0].toLocal({ x: centerX, y: centerY });
+            // this.$refs['viewport'].translate(x, y);
+            if (delta < 0) {
+                // this.$refs['viewport'].translate(-x * zoomFactor, -y * zoomFactor);
+                const newVpWidth = this.vpWidth * zoomFactor;
+                const newVpHeight = this.vpHeight * zoomFactor;
+                this.vpWidth = Math.min(3500, newVpWidth);
+                this.vpHeight = Math.min(3500, newVpHeight);
+                if (this.vpWidth == newVpWidth)
+                    this.$refs['viewport'].translate(x-x * zoomFactor, y-y * zoomFactor);
+                // else 
+                //     this.$refs['viewport'].translate(-x, -y);
+            }
+            else if (delta > 0) {
+                // this.$refs['viewport'].translate(-x / zoomFactor, -y / zoomFactor);
+                const newVpWidth = this.vpWidth / zoomFactor;
+                const newVpHeight = this.vpHeight / zoomFactor;
+                this.vpWidth = Math.max(this.drawWidth, newVpWidth);
+                this.vpHeight = Math.max(this.drawHeight, newVpHeight);
+                if (this.vpWidth == newVpWidth)
+                    this.$refs['viewport'].translate(x-x / zoomFactor, y-y / zoomFactor);
+                // else 
+                //     this.$refs['viewport'].translate(-x, -y);
+            }
         }
     },
-    mounted() {}
+    mounted() {
+        this.$nextTick(() => {
+            this.vpWidth = this.drawWidth;
+            this.vpHeight = this.drawHeight;
+        })
+    }
 }
 
 export default component;

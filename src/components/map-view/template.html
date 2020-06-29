@@ -1,18 +1,33 @@
-<div style="width: calc(100% - 1em); height: calc(100% - 1em); padding: .5em;" @contextmenu="openContextMenu($event)">
-    <div>
-        map view
-        <button @click="openModal($event)">Click me!</button>
-    </div>
-    <div style="border: 1px solid black;display:inline-block;">
-        <wi-select :options="opts" :get-selected="getSelected" :get-label-fn="getLabelFn" :on-select="onSelectItemChanged" :item-buttons="optButtons"></wi-select>
-    </div>
-
-    <fragment>
-        <v-scene :view-width="800" :view-height="600" :transparent="true">
-            <v-rect :view-width="30" :view-height="100" :line-width="1" 
-                :enabled="true" :draggable="true"
-                :constrained="true"
-                fill-color="#ccffcc" />
-        </v-scene>
-    </fragment>
-</div>
+<fragment>
+<!--
+<v-scene :view-width="drawWidth" :view-height="drawHeight" :transparent="true">
+    <v-viewport ref="viewport" :view-pos-x="0" :view-pos-y="0" :viewport-width="drawWidth" :viewport-height="drawHeight"
+        :draggable="true"
+        :view-width="vpWidth" :view-height="vpHeight" pan="both" :on-zoom="zoomFn"
+        line-color="rgba(0,0,255,0.5)" :line-width="3"> 
+        <v-cartersian 
+            :expanded="true" :enabled="true"
+            :fill-color="0xFFFFFF" :line-width="1" :line-color="0x010101"
+            :real-min-x="minX" :real-max-x="maxX"
+            :real-min-y="minY" :real-max-y="maxY"
+            x-transform="linear" y-transform="linear"
+            :major-ticks-x="5" :minor-ticks-x="5" 
+            :major-ticks-y="5" :minor-ticks-y="5"
+            label-fill-color="black"
+            label-stroke-color="white"
+            :grid="false" tick-label-position-x="sticky" tick-label-position-y="sticky" tick-precision="1" >
+            <v-contour
+                :values="contourValues"
+                :headers="contourHeaders"
+                :view-width="vpWidth"
+                :view-height="vpHeight">
+            </v-contour>
+        </v-cartersian>
+    </v-viewport>
+</v-scene>
+<contour-file-import
+    :negative-data="false"
+    :on-data-changed="onDataChanged"
+></contour-file-import>
+-->
+</fragment>

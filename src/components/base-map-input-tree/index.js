@@ -3,8 +3,8 @@ import "./style.less";
 import Vue from "vue";
 
 // DEPENDENT COMPONENTS 
-// import { WiTree } from "@revotechuet/misc-component-vue"
-import { WiTree } from "../../../../misc-component-vue";
+import { WiTree } from "@revotechuet/misc-component-vue"
+// import { WiTree } from "../../../../misc-component-vue";
 Vue.component('wi-tree', WiTree);
 
 const component =  {
@@ -15,7 +15,11 @@ const component =  {
     },
     watch: {},
     methods: {
-        getLabel: (node) => node.name,
+        getLabel: (node) => {
+            if (node.type == "well") 
+                return `${node.parent}/${node.name}`;
+            return node.name
+        },
         getIcon: (node) => {
             return "fa fa-folder";
         },
@@ -25,15 +29,12 @@ const component =  {
         },
         onNodeRightClick: function(event, node) {
             // console.log("right click", event, node);
-            this.showContextMenu(event, [
-                {label: "Import Wells", handler: function() {console.log(this.label)}},
-                {label: "TEST 2", handler: function() {console.log(this.label)}},
-                {label: "TEST 3", handler: function() {console.log(this.label)}},
-            ]);
+            this.showContextMenu(event, node.contextMenu || []);
         }
     },
     mounted() {
         this.$nextTick(async() => {
+            console.log(this.treeConfig)
         })
     }
 }

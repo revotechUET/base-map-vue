@@ -1,6 +1,8 @@
-const WELL = 0;
-const ZMAP = 1;
-const BOUNDARY = 2;
+import shp from "shpjs";
+
+const WELL = "Wells";
+const ZMAP = "Z-Map";
+const BOUNDARY = "Boundary";
 
 const mergeArray = function (originArr, newArr, equalFn) {
     for (const item of newArr) {
@@ -10,10 +12,97 @@ const mergeArray = function (originArr, newArr, equalFn) {
         }
     }
 };
+
+const wellNodeContextMenu = [
+    {
+        label: "Import Wells", handler: function (close) {
+            const vueComponent = this;
+            close();
+            if (vueComponent.importWellDialog) {
+                vueComponent.importWellDialog({
+                    onLoadWells: function(wells) {
+                        console.log(wells);
+                        projectTree.addWells(wells);
+                    }
+                })
+            }
+        }
+    }
+];
+
+const zmapNodeContextMenu = [
+    {
+        label: "Import Zmap", handler: function (close) {
+            const vueComponent = this;
+            close();
+            if (vueComponent.importZmapDialog) {
+                vueComponent.importZmapDialog({
+                    onLoadData: function(data) {
+                        console.log("DATA LOADED", data);
+                        const file = data.file;
+                        if (file) {
+                            const fileName = file.name;
+                            projectTree.addZMaps([{
+                                name: fileName,
+                                data
+                            }])
+                        }
+                    }
+                })
+            }
+        }
+    }
+];
+
+const boundaryNodeContextMenu = [
+    {
+        label: "Import Boundary", handler: function (close) {
+            const vueComponent = this;
+            close();
+            if (vueComponent.promptDialog) {
+                vueComponent.importFileDialog({
+                    onLoadFile: function(file) {
+                        console.log("File loaded", file);
+
+                        const reader = new FileReader();
+                        reader.onload = function(event) {
+                            shp(event.target.result)
+                                .then(geojson => {
+                                    console.log("loaded geojson", geojson);
+
+                                    projectTree.addBoundarys([
+                                        {
+                                            name: file.name,
+                                            file,
+                                            data: geojson
+                                        }
+                                    ])
+                                });
+                        }
+                        reader.readAsArrayBuffer(file);
+                    }
+                })
+            }
+        }
+    }
+];
+
 const tree = [
-    { name: "Wells", children: [] },
-    { name: "Z-Map", children: [] },
-    { name: "Boundary", children: [] }
+    {
+        name: WELL,
+        children: [],
+        contextMenu: wellNodeContextMenu
+    },
+    {
+        name: ZMAP,
+        children: [],
+        contextMenu: zmapNodeContextMenu
+    },
+    {
+        name: BOUNDARY,
+        children: [],
+        contextMenu: boundaryNodeContextMenu
+    }
 ];
 
 const project = [
@@ -24,18 +113,18 @@ const project = [
 const projectTree = {
     tree, project,
     addWells: function(wells = []) {
-        mergeArray(this.tree[WELL].children, wells, (w1,w2) => w1 == w2);
+        mergeArray(this.tree.find(n => n.name == WELL).children, wells, (w1,w2) => w1 == w2);
     },
     addZMaps: function(zmaps = []) {
-        mergeArray(this.tree[ZMAP].children, zmaps, (z1,z2) => z1 == z2);
+        mergeArray(this.tree.find(n => n.name == ZMAP).children, zmaps, (z1,z2) => z1 == z2);
     },
     addBoundarys: function(boundarys = []) {
-        mergeArray(this.tree[BOUNDARY].children, boundarys, (b1,b2) => b1 == b2);
+        mergeArray(this.tree.find(n => n.name == BOUNDARY).children, boundarys, (b1,b2) => b1 == b2);
     },
     clearProject: function() {
-        this.tree[WELL].children.length = 0;
-        this.tree[ZMAP].children.length = 0;
-        this.tree[BOUNDARY].children.length = 0;
+        this.tree.find(n => n.name == WELL).children.length = 0;
+        this.tree.find(n => n.name == ZMAP).children.length = 0;
+        this.tree.find(n => n.name == BOUNDARY).children.length = 0;
     },
     changeProject: function(newProject) {
         this.clearProject();
