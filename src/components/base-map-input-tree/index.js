@@ -21,10 +21,22 @@ const component =  {
             return node.name
         },
         getIcon: (node) => {
+            if (node.type == "well") {
+                return node.show ? 'fa fa-eye' : "fa fa-eye-slash";
+            } else if (node.type == "boundary") {
+                return node.show ? 'fa fa-eye' : "fa fa-eye-slash";
+            } else if (node.type == "zmap") {
+                return node.show ? 'fa fa-eye' : "fa fa-eye-slash";
+            }
             return "fa fa-folder";
         },
         getChildren: (node) => node.children,
-        onNodeClick: (event, node, selectedNodes, tree) => {
+        onNodeClick: function(event, node, selectedNodes, tree) {
+            if (node.onClick) {
+                this.$nextTick(() => {
+                    node.onClick.call(node);
+                })
+            }
             // console.log(event, node, selectedNodes, tree);
         },
         onNodeRightClick: function(event, node) {

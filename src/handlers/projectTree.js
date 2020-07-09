@@ -1,4 +1,5 @@
 import shp from "shpjs";
+import dataStore from "./dataStore";
 
 const WELL = "Wells";
 const ZMAP = "Z-Map";
@@ -42,9 +43,10 @@ const zmapNodeContextMenu = [
                         const file = data.file;
                         if (file) {
                             const fileName = file.name;
+                            const dataStoreId = dataStore.storeData(data);
                             projectTree.addZMaps([{
                                 name: fileName,
-                                data
+                                dataStoreId
                             }])
                         }
                     }
@@ -70,11 +72,12 @@ const boundaryNodeContextMenu = [
                                 .then(geojson => {
                                     console.log("loaded geojson", geojson);
 
+                                    const dataStoreId = dataStore.storeData(geojson);
                                     projectTree.addBoundarys([
                                         {
                                             name: file.name,
                                             file,
-                                            data: geojson
+                                            dataStoreId
                                         }
                                     ])
                                 });
@@ -105,6 +108,17 @@ const tree = [
     }
 ];
 
+function toTreeConfig(arr, type) {
+    arr.forEach(item => {
+        item.show = false;
+        item.type = type;
+        item.onClick = function() {
+            this.show = !this.show;
+        }
+    })
+    return arr;
+}
+
 const project = [
     {
         name: "Project", children: tree, '$meta': {expanded: true}
@@ -112,19 +126,35 @@ const project = [
 ];
 const projectTree = {
     tree, project,
+    getWells: function() {
+        return this.tree.find(n => n.name == WELL).children;
+    },
+    getZMaps: function() {
+        return this.tree.find(n => n.name == ZMAP).children;
+    },
+    getBoundarys: function() {
+        return this.tree.find(n => n.name == BOUNDARY).children;
+    },
     addWells: function(wells = []) {
-        mergeArray(this.tree.find(n => n.name == WELL).children, wells, (w1,w2) => w1 == w2);
+        const _wells = toTreeConfig(wells, 'well');
+        // mergeArray(this.tree.find(n => n.name == WELL).children, _wells, (w1,w2) => w1 == w2);
+        mergeArray(this.getWells(), _wells, (w1,w2) => w1 == w2);
     },
     addZMaps: function(zmaps = []) {
-        mergeArray(this.tree.find(n => n.name == ZMAP).children, zmaps, (z1,z2) => z1 == z2);
+        const _zmaps = toTreeConfig(zmaps, 'zmap');
+        // mergeArray(this.tree.find(n => n.name == ZMAP).children, _zmaps, (z1,z2) => z1 == z2);
+        mergeArray(this.getZMaps(), _zmaps, (z1,z2) => z1 == z2);
     },
     addBoundarys: function(boundarys = []) {
-        mergeArray(this.tree.find(n => n.name == BOUNDARY).children, boundarys, (b1,b2) => b1 == b2);
+        const _boundarys = toTreeConfig(boundarys, 'boundary');
+        // mergeArray(this.tree.find(n => n.name == BOUNDARY).children, _boundarys, (b1,b2) => b1 == b2);
+        mergeArray(this.getBoundarys(), _boundarys, (b1,b2) => b1 == b2);
     },
     clearProject: function() {
         this.tree.find(n => n.name == WELL).children.length = 0;
         this.tree.find(n => n.name == ZMAP).children.length = 0;
         this.tree.find(n => n.name == BOUNDARY).children.length = 0;
+        dataStore.flushStore();
     },
     changeProject: function(newProject) {
         this.clearProject();
