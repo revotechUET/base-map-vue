@@ -1,12 +1,15 @@
 import template from "./template.html";
 import "./style.less";
-import {geoMercator, geoPath, geoGraticule10} from "d3-geo";
-import {contours} from "d3-contour";
-import {range, extent} from "d3-array";
 import * as _ from "lodash";
 import projectTree from "../../handlers/projectTree";
 import dataStore from "../../handlers/dataStore";
 import proj4 from "proj4";
+
+import {geoMercator, geoPath, geoGraticule10} from "d3-geo";
+import {contours} from "d3-contour";
+import {range, extent} from "d3-array";
+import {zoom} from "d3-zoom";
+import {select, event as d3Event} from "d3-selection";
 
 function Renderer(context = null, options = {}) {
     const renderer = this;
@@ -72,11 +75,34 @@ function Map(el, width, height, scale = 100, center = {}) {
         })
     })
 
+    const zoomBehavior = zoom()
+        .on('zoom', () => {
+            onZoom.call(this);
+        });
+
+    select(el).call(zoomBehavior);
+
+    function onZoom() {
+        console.log(d3Event.transform);
+        const transform = d3Event.transform;
+
+        const newScale = transform.k * 100;
+        this.updateScale(newScale);
+
+        this.updateCenter({
+            lat: transform.y,
+            lng: -transform.x
+        })
+
+        this.doDraw();
+    }
+
     this._context = el.getContext('2d');
     this._projection = geoMercator()
         .translate([width / 2, height / 2])
         .scale(scale)
         .center([center.lng || 0, center.lat || 0]);
+
     this._pathGenerator = geoPath(this._projection);
 
     this._renderer = new Renderer(this._context, { width, height });
@@ -298,14 +324,14 @@ const component =  {
                     .thresholds(thresholds)
                     (values)
                     .map(({type, value, coordinates}) => {
-                    return {type, value, coordinates: coordinates.map(rings => {
-                        return rings.map(points => {
-                        return points.map(([x, y]) => ([
-                            sw[0] + x * lngScale,
-                            sw[1] + y * latScale 
-                        ]));
-                        });
-                    })};
+                        return {type, value, coordinates: coordinates.map(rings => {
+                            return rings.map(points => {
+                            return points.map(([x, y]) => ([
+                                sw[0] + x * lngScale,
+                                sw[1] + y * latScale 
+                            ]));
+                            });
+                        })};
                     });
 
                 contourData.forEach(cd => {
@@ -335,6 +361,7 @@ const component =  {
             this.map.addObject('geojson', graticule, {strokeStyle: "#ccc"});
 
             const landObj = require("./land-med.json");
+            /*
             const mapInstance = this.map;
             const vueInstance = this;
             landObj.features.forEach(f => {
@@ -347,7 +374,8 @@ const component =  {
                     }
                 });
             })
-            // this.map.addObject('geojson', landObj, {strokeStyle: "#000"});
+            */
+            this.map.addObject('geojson', landObj, {strokeStyle: "#000"});
 
             this.map.doDraw();
         })
