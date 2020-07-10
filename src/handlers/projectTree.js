@@ -126,14 +126,23 @@ const project = [
 ];
 const projectTree = {
     tree, project,
-    getWells: function() {
-        return this.tree.find(n => n.name == WELL).children;
+    getWells: function(showOnly = false) {
+        const result = this.tree.find(n => n.name == WELL).children;
+        if (showOnly)
+            return result.filter(r => r.show == true);
+        return result;
     },
-    getZMaps: function() {
-        return this.tree.find(n => n.name == ZMAP).children;
+    getZMaps: function(showOnly = false) {
+        const result = this.tree.find(n => n.name == ZMAP).children;
+        if (showOnly)
+            return result.filter(r => r.show == true);
+        return result;
     },
-    getBoundarys: function() {
-        return this.tree.find(n => n.name == BOUNDARY).children;
+    getBoundarys: function(showOnly = false) {
+        const result = this.tree.find(n => n.name == BOUNDARY).children;
+        if (showOnly)
+            return result.filter(r => r.show == true);
+        return result;
     },
     addWells: function(wells = []) {
         const _wells = toTreeConfig(wells, 'well');
