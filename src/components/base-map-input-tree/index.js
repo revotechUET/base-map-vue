@@ -27,6 +27,8 @@ const component =  {
                 return node.show ? 'fa fa-eye' : "fa fa-eye-slash";
             } else if (node.type == "zmap") {
                 return node.show ? 'fa fa-eye' : "fa fa-eye-slash";
+            } else if (node.type == "map") {
+                return node.show ? 'fa fa-eye' : "fa fa-eye-slash";
             }
             return "fa fa-folder";
         },

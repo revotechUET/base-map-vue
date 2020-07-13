@@ -4,6 +4,7 @@ import dataStore from "./dataStore";
 const WELL = "Wells";
 const ZMAP = "Z-Map";
 const BOUNDARY = "Boundary";
+const MAP = "Map";
 
 const mergeArray = function (originArr, newArr, equalFn) {
     for (const item of newArr) {
@@ -90,6 +91,35 @@ const boundaryNodeContextMenu = [
     }
 ];
 
+const mapNodeContextMenu = [
+    {
+        label: "Import Boundary", handler: function (close) {
+            const vueComponent = this;
+            close();
+            if (vueComponent.promptDialog) {
+                vueComponent.importFileDialog({
+                    onLoadFile: function(file) {
+                        console.log("File loaded", file);
+
+                        const reader = new FileReader();
+                        reader.onload = function(event) {
+                            const geojson = JSON.parse(event.target.result);
+                            console.log("geojson", geojson);
+                            const dataStoreId = dataStore.storeData(geojson);
+                            projectTree.addMaps([{
+                                name: file.name,
+                                file,
+                                dataStoreId
+                            }]);
+                        }
+                        reader.readAsText(file);
+                    }
+                })
+            }
+        }
+    }
+];
+
 const tree = [
     {
         name: WELL,
@@ -105,12 +135,17 @@ const tree = [
         name: BOUNDARY,
         children: [],
         contextMenu: boundaryNodeContextMenu
-    }
+    },
+    {
+        name: MAP,
+        children: [],
+        contextMenu: mapNodeContextMenu
+    },
 ];
 
 function toTreeConfig(arr, type) {
     arr.forEach(item => {
-        item.show = false;
+        item.show = true;
         item.type = type;
         item.onClick = function() {
             this.show = !this.show;
@@ -144,6 +179,12 @@ const projectTree = {
             return result.filter(r => r.show == true);
         return result;
     },
+    getMaps: function(showOnly = false) {
+        const result = this.tree.find(n => n.name == MAP).children;
+        if (showOnly)
+            return result.filter(r => r.show == true);
+        return result;
+    },
     addWells: function(wells = []) {
         const _wells = toTreeConfig(wells, 'well');
         // mergeArray(this.tree.find(n => n.name == WELL).children, _wells, (w1,w2) => w1 == w2);
@@ -158,6 +199,10 @@ const projectTree = {
         const _boundarys = toTreeConfig(boundarys, 'boundary');
         // mergeArray(this.tree.find(n => n.name == BOUNDARY).children, _boundarys, (b1,b2) => b1 == b2);
         mergeArray(this.getBoundarys(), _boundarys, (b1,b2) => b1 == b2);
+    },
+    addMaps: function(maps = []) {
+        const _maps = toTreeConfig(maps, "map");
+        mergeArray(this.getMaps(), _maps, (m1,m2) => m1 == m2);
     },
     clearProject: function() {
         this.tree.find(n => n.name == WELL).children.length = 0;

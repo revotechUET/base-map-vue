@@ -1,5 +1,5 @@
 <div class="map-view" @contextmenu="openContextMenu">
-    <canvas ref="drawCanvas" style="border: 1px dashed black" :width="drawWidth" :height="drawHeight"></canvas>
+    <canvas ref="drawCanvas" style="border: 1px dashed black; background-color: steelblue;" :width="drawWidth" :height="drawHeight"></canvas>
     <div>
         <input type="range" min="-180" max="180" step="1" v-model="centerLng">
         Long: {{centerLng}}

@@ -29,7 +29,8 @@ function Renderer(context = null, options = {}) {
         })
     }
 
-    this.draw = _.debounce(this.drawRaw, 20);
+    // this.draw = _.debounce(this.drawRaw, 20);
+    this.draw = _.throttle(this.drawRaw, 100);
 
     this.dequeue = function(matchingFn) {
         const taskIdx = this.queue.findIndex(job => matchingFn(job));
@@ -52,13 +53,15 @@ function Renderer(context = null, options = {}) {
 const objectCatalog = {
     "geojson": MapGeoJson,
     "boundary": MapBoundary,
-    "contour": MapContour
+    "contour": MapContour,
+    "axis": MapAxis,
+    "map": MapLand
 }
 
 function Map(el, width, height, scale = 100, center = {}) {
     const mapInstance = this;
 
-    const events = ["mousemove"];
+    const events = ["mousemove", "mousedown"];
 
     events.forEach(eName => {
         el.addEventListener(eName, function(event) {
@@ -67,6 +70,11 @@ function Map(el, width, height, scale = 100, center = {}) {
             mapInstance.drawings.forEach(obj => {
                 if (obj.isInside(mapInstance._context, x, y)) {
                     const handler = obj.events[eName];
+                    if (handler) {
+                        handler.call(obj, mapInstance._context, x, y);
+                    }
+                } else {
+                    const handler = obj.events[`${eName}-outside`];
                     if (handler) {
                         handler.call(obj, mapInstance._context, x, y);
                     }
@@ -83,16 +91,13 @@ function Map(el, width, height, scale = 100, center = {}) {
     select(el).call(zoomBehavior);
 
     function onZoom() {
-        console.log(d3Event.transform);
         const transform = d3Event.transform;
 
         const newScale = transform.k * 100;
         this.updateScale(newScale);
 
-        this.updateCenter({
-            lat: transform.y,
-            lng: -transform.x
-        })
+        const newCenter = {lng: - transform.x * 10 / newScale, lat: transform.y * 10 / newScale};
+        this.updateCenter(newCenter);
 
         this.doDraw();
     }
@@ -121,9 +126,9 @@ function Map(el, width, height, scale = 100, center = {}) {
         this._projection.center([newLng, newLat]);
     }
 
-    this.addObject = (type, geojson, configs) => {
+    this.addObject = (type, configs) => {
         const constructor = objectCatalog[type];
-        const obj = new constructor(this._projection, this._pathGenerator, geojson, configs);
+        const obj = new constructor(this._projection, this._pathGenerator, configs);
         // register functions
         obj.destroy = removeObjFn(obj);
 
@@ -142,6 +147,10 @@ function Map(el, width, height, scale = 100, center = {}) {
 
     this.getContour = function() {
         return this.drawings.filter(dw => dw instanceof MapContour);
+    }
+
+    this.getMap = function() {
+        return this.drawings.filter(dw => dw instanceof MapLand);
     }
 
     function removeObjFn(obj) {
@@ -186,9 +195,9 @@ MapObject.prototype.isInside = function(context, x, y) {
     return context.isPointInPath(this.path, x, y);
 }
 
-function MapGeoJson(projection, pathGenerator, geojson = null, options = {}) {
+function MapGeoJson(projection, pathGenerator, options = {}) {
     MapObject.call(this, projection, pathGenerator);
-    this.geojson = geojson;
+    this.geojson = options.geojson || null;
     this.path = null;
 
     this.fillStyle = options.fillStyle || null;
@@ -216,8 +225,17 @@ MapGeoJson.prototype.draw = function(context) {
         context.stroke(this.path);
 }
 
-function MapBoundary(projection, pathGenerator, geojson = null, options = {}) {
-    MapGeoJson.call(this, projection, pathGenerator, geojson, options);
+function MapLand(projection, pathGenerator, options = {}) {
+    MapGeoJson.call(this, projection, pathGenerator, options);
+    this.type = "boundary";
+    this.dataStoreId = options.dataStoreId;
+}
+// extend the MapGeoJson class
+MapLand.prototype = Object.create(MapGeoJson.prototype);
+MapLand.prototype.constructor = MapLand;
+
+function MapBoundary(projection, pathGenerator, options = {}) {
+    MapGeoJson.call(this, projection, pathGenerator, options);
     this.type = "boundary";
     this.dataStoreId = options.dataStoreId;
 }
@@ -225,14 +243,55 @@ function MapBoundary(projection, pathGenerator, geojson = null, options = {}) {
 MapBoundary.prototype = Object.create(MapGeoJson.prototype);
 MapBoundary.prototype.constructor = MapBoundary;
 
-function MapContour(projection, pathGenerator, geojson = null, options = {}) {
-    MapGeoJson.call(this, projection, pathGenerator, geojson, options);
+function MapContour(projection, pathGenerator, options = {}) {
+    MapGeoJson.call(this, projection, pathGenerator, options);
     this.type = "contour";
     this.dataStoreId = options.dataStoreId;
 }
 // extend the MapGeoJson class
 MapContour.prototype = Object.create(MapGeoJson.prototype);
 MapContour.prototype.constructor = MapContour;
+
+function MapWell(projection, pathGenerator, options = {}) {
+    MapObject.call(this, projection, pathGenerator, options);
+    this.type = "well";
+}
+// extend the MapObject class
+MapWell.prototype = Object.create(MapObject.prototype);
+MapWell.prototype.constructor = MapWell;
+MapWell.prototype.draw = function(context) {
+}
+
+function MapAxis(projection, pathGenerator, options) {
+    MapObject.call(this, projection, pathGenerator);
+    this.type = "axis";
+    this.fillStyle = options.fillStyle;
+    this.strokeStyle = options.strokeStyle;
+}
+// extend the MapObject class
+MapAxis.prototype = Object.create(MapObject.prototype);
+MapAxis.prototype.constructor = MapGeoJson;
+MapAxis.prototype.draw = function(context) {
+    context.fillStyle = this.fillStyle;
+    context.strokeStyle = this.strokeStyle;
+
+    //draw x axis
+    context.textAlign = "center";
+    context.textBaseline = "top";
+    range(-180, 190, 10).forEach(lng => {
+        const pos = this.projection([lng, 0]);
+        context.fillRect(pos[0]-1, 0, 2, 5);
+        context.strokeText(lng, pos[0], 10);
+    })
+    // draw y axis
+    context.textAlign = "left";
+    context.textBaseline = "middle";
+    range(-90, 100, 10).forEach(lat => {
+        const pos = this.projection([0, lat]);
+        context.fillRect(0, pos[1]-1, 5, 2);
+        context.strokeText(lat, 10, pos[1]);
+    })
+}
 
 
 // ============================================
@@ -261,6 +320,9 @@ const component =  {
         },
         zmapLength() {
             return projectTree.getZMaps(true).length;
+        },
+        mapLength() {
+            return projectTree.getMaps(true).length;
         }
     },
     watch: {
@@ -276,13 +338,46 @@ const component =  {
             this.map && this.map.updateScale(this.scale);
             this.map.doDraw();
         },
+        mapLength() {
+            const maps = projectTree.getMaps(true);
+            this.map.getMap().forEach(m => m.destroy());
+            maps.forEach(m => {
+                const data = this.getData(m.dataStoreId);
+                this.map.addObject('map', {
+                    strokeStyle: "#ccc",
+                    fillStyle: "rgba(0, 0, 0, 0.5)",
+                    geojson: data
+                });
+            })
+            this.map.doDraw();
+        },
         boundaryLength() {
             const boundarys = projectTree.getBoundarys(true);
             console.log("boundary changed", boundarys);
             this.map.getBoundary().forEach(b => b.destroy());
+            const self = this;
+            const mapObj = this.map;
             boundarys.forEach(b => {
                 const data = this.getData(b.dataStoreId);
-                const obj = this.map.addObject("boundary", data, {strokeStyle: "#00ff00"});
+                data.features.forEach(f => {
+                    const boundaryConfig = {
+                        strokeStyle: "#00ff00",
+                        fillStyle: 'rgba(255, 255, 255, 0.5)',
+                        geojson: f,
+                        events: {
+                            "mousedown": function(context, x, y) {
+                                this.fillStyle = "#0000ff";
+                                self.propView = this.geojson.properties;
+                                mapObj.doDraw();
+                            },
+                            "mousedown-outside": function(context, x, y) {
+                                this.fillStyle = 'rgba(255, 255, 255, 0.5)';
+                                mapObj.doDraw();
+                            }
+                        }
+                    }
+                    const obj = this.map.addObject("boundary", boundaryConfig);
+                })
             })
             this.map.doDraw();
         },
@@ -335,7 +430,7 @@ const component =  {
                     });
 
                 contourData.forEach(cd => {
-                    this.map.addObject("contour", cd, {strokeStyle: "#0000ff"});
+                    this.map.addObject("contour", {strokeStyle: "#0000ff", geojson: cd});
                 })
             })
             this.map.doDraw();
@@ -357,25 +452,19 @@ const component =  {
     mounted() {
         this.$nextTick(() => {
             this.map = new Map(this.$refs.drawCanvas, this.drawWidth, this.drawHeight, 100, {lat: 0, lng: 0});
-            const graticule = geoGraticule10();
-            this.map.addObject('geojson', graticule, {strokeStyle: "#ccc"});
 
-            const landObj = require("./land-med.json");
+            // land
             /*
-            const mapInstance = this.map;
-            const vueInstance = this;
-            landObj.features.forEach(f => {
-                this.map.addObject('geojson', f, {
-                    strokeStyle: "#000",
-                    events: {
-                        "mousemove": function(context, x, y) {
-                            vueInstance.propView = this.geojson.properties;
-                        }
-                    }
-                });
-            })
+            const landObj = require("./land-low.json");
+            this.map.addObject('geojson', {strokeStyle: '#000', fillStyle: 'rgba(0, 0, 0, 0.5)', geojson: landObj});
             */
-            this.map.addObject('geojson', landObj, {strokeStyle: "#000"});
+
+            // graticule
+            const graticule = geoGraticule10();
+            this.map.addObject('geojson', {strokeStyle: "#ccc", geojson: graticule});
+
+            // axis
+            this.map.addObject('axis', {strokeStyle: "#ff0000"});
 
             this.map.doDraw();
         })
