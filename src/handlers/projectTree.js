@@ -93,7 +93,7 @@ const boundaryNodeContextMenu = [
 
 const mapNodeContextMenu = [
     {
-        label: "Import Boundary", handler: function (close) {
+        label: "Import Map GeoJson", handler: function (close) {
             const vueComponent = this;
             close();
             if (vueComponent.promptDialog) {
